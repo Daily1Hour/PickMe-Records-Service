@@ -42,7 +42,7 @@ public class RecordController {
 
         Record savedRecord = recordRepository.save(record);
 
-        RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord)
+        RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord);
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
