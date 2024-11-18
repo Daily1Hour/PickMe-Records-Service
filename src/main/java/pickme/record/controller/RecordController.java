@@ -24,7 +24,7 @@ public class RecordController {
     @Operation(summary = "기록 생성", description = "새로운 면접 기록을 생성합니다.")
     @PostMapping("/create")
     public Record createRecord(
-            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "Authorization", required = true) String token,
             @RequestBody Record record
     ) {
         // 로그인 토큰 출력
@@ -38,7 +38,7 @@ public class RecordController {
     @Operation(summary = "모든 기록 조회", description = "모든 면접 기록을 조회합니다.")
     @GetMapping("/read")
     public List<Record> getAllRecords(
-            @RequestHeader(value = "Authorization", required = false) String token
+            @RequestHeader(value = "Authorization", required = true) String token
     ) {
         System.out.println("Received token: " + token);
         return recordRepository.findAll();
@@ -48,7 +48,7 @@ public class RecordController {
     @Operation(summary = "특정 기록 조회", description = "특정 면접 기록을 조회합니다.")
     @GetMapping("/read/{postId}")
     public Optional<Record> getRecord(
-            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId
     ) {
         System.out.println("Received token: " + token);
@@ -59,7 +59,7 @@ public class RecordController {
     @Operation(summary = "기록 업데이트", description = "특정 면접 기록을 업데이트합니다.")
     @PutMapping("/update/{postId}")
     public Record updateRecord(
-            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId,
             @RequestBody Record updatedRecord
     ) {
@@ -83,7 +83,7 @@ public class RecordController {
     @Operation(summary = "기록 삭제", description = "특정 면접 기록을 삭제합니다.")
     @DeleteMapping("/delete/{postId}")
     public void deleteRecord(
-            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId
     ) {
         System.out.println("Received token: " + token);
