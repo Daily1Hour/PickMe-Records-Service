@@ -108,12 +108,18 @@ public class RecordController {
     // DELETE: 기록 삭제
     @Operation(summary = "기록 삭제", description = "특정 면접 기록을 삭제합니다.")
     @DeleteMapping("/delete/{postId}")
-    public void deleteRecord(
+    public ResponseEntity<Void> deleteRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId
     ) {
         System.out.println("Received token: " + token);
-        recordRepository.deleteById(postId);
+
+        if (recordRepository.existsById(postId)) {
+            recordRepository.deleteById(postId);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
 }
