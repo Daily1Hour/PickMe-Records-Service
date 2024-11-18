@@ -4,7 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pickme.record.dto.RecordCreateDto;
+import pickme.record.dto.RecordResponseDto;
+import pickme.record.mapper.RecordMapper;
 import pickme.record.model.Record;
 import pickme.record.repository.RecordRepository;
 
@@ -19,19 +24,27 @@ public class RecordController {
 
     @Autowired
     private RecordRepository recordRepository;
+    @Autowired
+    private RecordMapper recordMapper;
 
     // CREATE: 기록 생성
     @Operation(summary = "기록 생성", description = "새로운 면접 기록을 생성합니다.")
     @PostMapping("/create")
-    public Record createRecord(
+    public ResponseEntity<RecordResponseDto> createRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestBody Record record
-    ) {
+            @RequestBody RecordCreateDto recordCreateDto
+            ) {
         // 로그인 토큰 출력
         System.out.println("Received token: " + token);
 
+        Record record = recordMapper.toEntity(recordCreateDto);
         record.setCreatedAt(new Date());
-        return recordRepository.save(record);
+
+        Record savedRecord = recordRepository.save(record);
+
+        RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord)
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     // READ ALL: 모든 기록 조회
