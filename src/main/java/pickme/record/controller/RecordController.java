@@ -67,12 +67,19 @@ public class RecordController {
     // READ ONE: 특정 기록 조회
     @Operation(summary = "특정 기록 조회", description = "특정 면접 기록을 조회합니다.")
     @GetMapping("/read/{postId}")
-    public Optional<Record> getRecord(
+    public ResponseEntity<RecordResponseDto> getRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId
     ) {
         System.out.println("Received token: " + token);
-        return recordRepository.findById(postId);
+
+        Optional<Record> optionalRecord = recordRepository.findById(postId);
+        if (optionalRecord.isPresent()) {
+            RecordResponseDto responseDto = recordMapper.toResponseDto(optionalRecord.get());
+            return ResponseEntity.ok(responseDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     // UPDATE: 기록 업데이트
