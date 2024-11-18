@@ -14,6 +14,6 @@ public interface RecordMapper {
 
     RecordResponseDto toResponseDto(Record record);
 
-    void updateEntity(RecordUpdateDto dto, @MappingTarget Record record);
+    void updateEntityFromDto(RecordUpdateDto dto, @MappingTarget Record record);
 
 }
