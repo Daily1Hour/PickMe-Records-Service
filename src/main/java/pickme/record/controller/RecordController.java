@@ -16,6 +16,7 @@ import pickme.record.repository.RecordRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/record")
@@ -50,11 +51,17 @@ public class RecordController {
     // READ ALL: 모든 기록 조회
     @Operation(summary = "모든 기록 조회", description = "모든 면접 기록을 조회합니다.")
     @GetMapping("/read")
-    public List<Record> getAllRecords(
+    public ResponseEntity<List<RecordResponseDto>> getAllRecords(
             @RequestHeader(value = "Authorization", required = true) String token
     ) {
         System.out.println("Received token: " + token);
-        return recordRepository.findAll();
+
+        List<Record> records = recordRepository.findAll();
+        List<RecordResponseDto> responseDtos = records.stream()
+                .map(recordMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseDtos);
     }
 
     // READ ONE: 특정 기록 조회
