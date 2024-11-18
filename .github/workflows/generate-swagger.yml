@@ -66,6 +66,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          clean: false
 
       - name: Prepare Swagger UI for GitHub Pages
         run: |
