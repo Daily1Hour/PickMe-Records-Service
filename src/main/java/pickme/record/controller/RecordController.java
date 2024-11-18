@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pickme.record.dto.RecordCreateDto;
 import pickme.record.dto.RecordResponseDto;
+import pickme.record.dto.RecordUpdateDto;
 import pickme.record.mapper.RecordMapper;
 import pickme.record.model.Record;
 import pickme.record.repository.RecordRepository;
@@ -85,20 +86,23 @@ public class RecordController {
     // UPDATE: 기록 업데이트
     @Operation(summary = "기록 업데이트", description = "특정 면접 기록을 업데이트합니다.")
     @PutMapping("/update/{postId}")
-    public Record updateRecord(
+    public ResponseEntity<RecordResponseDto> updateRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId,
-            @RequestBody Record updatedRecord
-    ) {
+            @RequestBody RecordUpdateDto updatedRecordDto
+            ) {
         System.out.println("Received token: " + token);
 
-        return recordRepository.findById(postId)
-                .map(record -> {
-                    record.setCategory(updatedRecord.getCategory());
-                    record.setContent(updatedRecord.getContent());
-                    return recordRepository.save(record);
-                })
-                .orElseThrow(() -> new RuntimeException("Record not found"));
+        Optional<Record> optionalRecord = recordRepository.findById(postId);
+        if (optionalRecord.isPresent()) {
+            Record record = optionalRecord.get();
+            recordMapper.updateEntityFromDto(updatedRecordDto, record);
+            Record savedRecord = recordRepository.save(record);
+            RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord);
+            return ResponseEntity.ok(responseDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     // DELETE: 기록 삭제
