@@ -42,4 +42,6 @@ jobs:
         uses: actions/upload-artifact@v4 # 아티팩트를 업로드하는 액션
         with:
           name: build-artifact # 아티팩트 이름
-          path: build/libs/**/*.jar # JAR 파일
+          path: |
+            build/libs/**/*.jar
+            !build/libs/**/*-plain.jar
