@@ -1,0 +1,81 @@
+name: Generate Swagger
+
+on:
+  push:
+    tags: # 태그가 푸시될 때만 실행
+      - "v*.*.*"
+
+permissions:
+  contents: write # 레포지토리 콘텐츠에 대한 쓰기 권한
+  actions: read # 액션에 대한 읽기 권한
+  pull-requests: write
+
+jobs:
+  update-swagger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get latest run ID # Gradle Build 워크플로우의 ID를 가져옴
+        id: get_run_id
+        run: |
+          run_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=success" \
+            | jq '.workflow_runs | map(select(.name == "Gradle Build")) | .[0].id')
+            # 다른 워크플로우의 ID를 가져오기 위해 GitHub API를 사용
+          echo "$run_id"
+          echo "run_id=$run_id" >> $GITHUB_ENV # 환경 변수에 저장
+
+      - name: Download artifact from previous workflow
+        uses: actions/download-artifact@v4 # 이전 워크플로우에서 아티팩트를 다운로드하는 액션
+        with:
+          name: build-artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.run_id }} # 이전 워크플로우의 ID
+
+      - name: Find the JAR file
+        id: find-jar
+        run: |
+          JAR_FILE=$(find . -maxdepth 1 -name "*.jar" -print -quit) # jar 파일을 찾아서 환경 변수에 저장
+          echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV # 환경 변수에 저장
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3 # Java를 설정하는 액션
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Start Spring Boot Application from Build
+        run: |
+          java -jar ${{ env.JAR_FILE }} & # 서버 실행
+          sleep 10 # 서버가 시작될 시간을 기다림
+
+      - name: Generate OpenAPI Spec (YAML)
+        run: curl -o openapi.yaml http://localhost:8080/v3/api-docs.yaml # OpenAPI 명세서를 저장
+
+      - name: Validate OpenAPI specification
+        run: |
+          npm install -g swagger-cli
+          swagger-cli validate openapi.yaml # OpenAPI 명세서를 검증
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2 # GitHub Release를 생성하는 액션
+        with:
+          files: openapi.yaml # 릴리즈에 포함할 파일
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare Swagger UI for GitHub Pages
+        run: |
+          mkdir swagger-ui # Swagger UI를 위한 디렉토리 생성
+          cp .github/swagger-index.html swagger-ui/index.html # Swagger UI를 위한 HTML 파일을 복사
+          cp openapi.yaml swagger-ui/ # Swagger UI가 API 명세서를 읽을 수 있도록 API 명세서 파일을 복사
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3 # GitHub Pages에 배포하는 액션
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub의 기본 인증 토큰
+          publish_dir: ./swagger-ui # GitHub Pages에 배포할 디렉토리
+
