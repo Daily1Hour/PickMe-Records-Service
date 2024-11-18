@@ -5,6 +5,7 @@ import org.mapstruct.MappingTarget;
 import pickme.record.dto.RecordCreateDto;
 import pickme.record.dto.RecordResponseDto;
 import pickme.record.dto.RecordUpdateDto;
+import pickme.record.model.Record;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {
