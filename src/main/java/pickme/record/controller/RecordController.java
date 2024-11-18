@@ -67,16 +67,11 @@ public class RecordController {
 
         return recordRepository.findById(postId)
                 .map(record -> {
-                    record.setUserId(updatedRecord.getUserId());
                     record.setCategory(updatedRecord.getCategory());
                     record.setContent(updatedRecord.getContent());
                     return recordRepository.save(record);
                 })
-                .orElseGet(() -> {
-                    updatedRecord.setPostId(postId);
-                    updatedRecord.setCreatedAt(new Date());
-                    return recordRepository.save(updatedRecord);
-                });
+                .orElseThrow(() -> new RuntimeException("Record not found"));
     }
 
     // DELETE: 기록 삭제
