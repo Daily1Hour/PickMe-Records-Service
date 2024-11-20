@@ -70,11 +70,18 @@ public class RecordController {
     @GetMapping("/read/{postId}")
     public ResponseEntity<RecordResponseDTO> getRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable ObjectId postId
+            @PathVariable String postId
     ) {
         System.out.println("Received token: " + token);
 
-        Optional<Record> optionalRecord = recordRepository.findById(postId);
+        ObjectId objectId;
+        try {
+            objectId = new ObjectId(postId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 잘못된 ObjectId
+        }
+
+        Optional<Record> optionalRecord = recordRepository.findById(objectId);
         if (optionalRecord.isPresent()) {
             RecordResponseDTO responseDTO = recordMapper.toResponseDTO(optionalRecord.get());
             return ResponseEntity.ok(responseDTO);

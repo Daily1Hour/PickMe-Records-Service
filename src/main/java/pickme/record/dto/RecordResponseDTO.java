@@ -11,7 +11,7 @@ import java.util.Date;
 public class RecordResponseDTO {
 
     @Schema(description = "Post ID (PK)", example = "60d5f483f8d4b91234567890")
-    private ObjectId postId;
+    private String postId;
 
     @Schema(description = "User ID", example = "user123")
     private String userId;
