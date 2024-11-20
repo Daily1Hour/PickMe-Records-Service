@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/record")
+@RequestMapping("/records")
 @Tag(name = "Record", description = "면접 기록 관리 API")
 public class RecordController {
 
