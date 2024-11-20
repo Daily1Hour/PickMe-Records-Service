@@ -117,12 +117,19 @@ public class RecordController {
     @DeleteMapping("/delete/{postId}")
     public ResponseEntity<Void> deleteRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable ObjectId postId
+            @PathVariable String postId
     ) {
         System.out.println("Received token: " + token);
 
-        if (recordRepository.existsById(postId)) {
-            recordRepository.deleteById(postId);
+        ObjectId objectId;
+        try {
+            objectId = new ObjectId(postId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        if (recordRepository.existsById(objectId)) {
+            recordRepository.deleteById(objectId);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
