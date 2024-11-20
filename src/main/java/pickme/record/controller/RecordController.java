@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pickme.record.dto.RecordCreateDto;
-import pickme.record.dto.RecordResponseDto;
-import pickme.record.dto.RecordUpdateDto;
+import pickme.record.dto.RecordCreateDTO;
+import pickme.record.dto.RecordResponseDTO;
+import pickme.record.dto.RecordUpdateDTO;
 import pickme.record.mapper.RecordMapper;
 import pickme.record.model.Record;
 import pickme.record.repository.RecordRepository;
@@ -32,43 +32,43 @@ public class RecordController {
     // CREATE: 기록 생성
     @Operation(summary = "기록 생성", description = "새로운 면접 기록을 생성합니다.")
     @PostMapping("/create")
-    public ResponseEntity<RecordResponseDto> createRecord(
+    public ResponseEntity<RecordResponseDTO> createRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestBody RecordCreateDto recordCreateDto
+            @RequestBody RecordCreateDTO recordCreateDTO
             ) {
         // 로그인 토큰 출력
         System.out.println("Received token: " + token);
 
-        Record record = recordMapper.toEntity(recordCreateDto);
+        Record record = recordMapper.toEntity(recordCreateDTO);
         record.setCreatedAt(new Date());
 
         Record savedRecord = recordRepository.save(record);
 
-        RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord);
+        RecordResponseDTO responseDTO = recordMapper.toResponseDTO(savedRecord);
 
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     // READ ALL: 모든 기록 조회
     @Operation(summary = "모든 기록 조회", description = "모든 면접 기록을 조회합니다.")
     @GetMapping("/read")
-    public ResponseEntity<List<RecordResponseDto>> getAllRecords(
+    public ResponseEntity<List<RecordResponseDTO>> getAllRecords(
             @RequestHeader(value = "Authorization", required = true) String token
     ) {
         System.out.println("Received token: " + token);
 
         List<Record> records = recordRepository.findAll();
-        List<RecordResponseDto> responseDtos = records.stream()
-                .map(recordMapper::toResponseDto)
+        List<RecordResponseDTO> responseDTOs = records.stream()
+                .map(recordMapper::toResponseDTO)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(responseDtos);
+        return ResponseEntity.ok(responseDTOs);
     }
 
     // READ ONE: 특정 기록 조회
     @Operation(summary = "특정 기록 조회", description = "특정 면접 기록을 조회합니다.")
     @GetMapping("/read/{postId}")
-    public ResponseEntity<RecordResponseDto> getRecord(
+    public ResponseEntity<RecordResponseDTO> getRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId
     ) {
@@ -76,8 +76,8 @@ public class RecordController {
 
         Optional<Record> optionalRecord = recordRepository.findById(postId);
         if (optionalRecord.isPresent()) {
-            RecordResponseDto responseDto = recordMapper.toResponseDto(optionalRecord.get());
-            return ResponseEntity.ok(responseDto);
+            RecordResponseDTO responseDTO = recordMapper.toResponseDTO(optionalRecord.get());
+            return ResponseEntity.ok(responseDTO);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -86,20 +86,20 @@ public class RecordController {
     // UPDATE: 기록 업데이트
     @Operation(summary = "기록 업데이트", description = "특정 면접 기록을 업데이트합니다.")
     @PutMapping("/update/{postId}")
-    public ResponseEntity<RecordResponseDto> updateRecord(
+    public ResponseEntity<RecordResponseDTO> updateRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
             @PathVariable ObjectId postId,
-            @RequestBody RecordUpdateDto updatedRecordDto
+            @RequestBody RecordUpdateDTO updatedRecordDTO
             ) {
         System.out.println("Received token: " + token);
 
         Optional<Record> optionalRecord = recordRepository.findById(postId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            recordMapper.updateEntityFromDto(updatedRecordDto, record);
+            recordMapper.updateEntityFromDto(updatedRecordDTO, record);
             Record savedRecord = recordRepository.save(record);
-            RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord);
-            return ResponseEntity.ok(responseDto);
+            RecordResponseDTO responseDTO = recordMapper.toResponseDTO(savedRecord);
+            return ResponseEntity.ok(responseDTO);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

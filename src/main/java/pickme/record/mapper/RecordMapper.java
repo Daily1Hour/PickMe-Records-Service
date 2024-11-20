@@ -2,18 +2,18 @@ package pickme.record.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-import pickme.record.dto.RecordCreateDto;
-import pickme.record.dto.RecordResponseDto;
-import pickme.record.dto.RecordUpdateDto;
+import pickme.record.dto.RecordCreateDTO;
+import pickme.record.dto.RecordResponseDTO;
+import pickme.record.dto.RecordUpdateDTO;
 import pickme.record.model.Record;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {
 
-    Record toEntity(RecordCreateDto dto);
+    Record toEntity(RecordCreateDTO dto);
 
-    RecordResponseDto toResponseDto(Record record);
+    RecordResponseDTO toResponseDTO(Record record);
 
-    void updateEntityFromDto(RecordUpdateDto dto, @MappingTarget Record record);
+    void updateEntityFromDto(RecordUpdateDTO dto, @MappingTarget Record record);
 
 }

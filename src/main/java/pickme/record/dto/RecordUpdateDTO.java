@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "DTO for updating an existing interview record")
-public class RecordUpdateDto {
+public class RecordUpdateDTO {
 
     @Schema(description = "Category", example = "1st interview")
     @NotBlank(message = "Category is required")
