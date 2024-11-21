@@ -29,7 +29,7 @@ public class Record {
     @Schema(description = "Question", example = "1분 자기소개")
     private String question;
 
-    @Schema(description = "Content", example = "안녕하십니까. 뫄뫄 기업 솨솨 직무에 지원한 김땡땡입니다.")
+    @Schema(description = "Answer", example = "안녕하십니까. 뫄뫄 기업 솨솨 직무에 지원한 김땡땡입니다.")
     private String answer;
 
     @Schema(description = "Creation Time", example = "2023-01-01T12:34:56Z")
