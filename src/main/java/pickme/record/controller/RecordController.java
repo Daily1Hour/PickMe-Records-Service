@@ -95,12 +95,19 @@ public class RecordController {
     @PutMapping("/update/{postId}")
     public ResponseEntity<RecordResponseDTO> updateRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable ObjectId postId,
+            @PathVariable String postId,
             @RequestBody RecordUpdateDTO updatedRecordDTO
             ) {
         System.out.println("Received token: " + token);
 
-        Optional<Record> optionalRecord = recordRepository.findById(postId);
+        ObjectId objectId;
+        try {
+            objectId = new ObjectId(postId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        Optional<Record> optionalRecord = recordRepository.findById(objectId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
             recordMapper.updateEntityFromDTO(updatedRecordDTO, record);
