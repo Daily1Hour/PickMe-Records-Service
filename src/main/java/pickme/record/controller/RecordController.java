@@ -103,7 +103,7 @@ public class RecordController {
         Optional<Record> optionalRecord = recordRepository.findById(postId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            recordMapper.updateEntityFromDto(updatedRecordDTO, record);
+            recordMapper.updateEntityFromDTO(updatedRecordDTO, record);
             Record savedRecord = recordRepository.save(record);
             RecordResponseDTO responseDTO = recordMapper.toResponseDTO(savedRecord);
             return ResponseEntity.ok(responseDTO);

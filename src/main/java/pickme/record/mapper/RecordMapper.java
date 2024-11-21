@@ -17,6 +17,6 @@ public interface RecordMapper {
     RecordResponseDTO toResponseDTO(Record record);
 
     @Mapping(target = "postId", ignore = true) // 업데이트 시 postId는 수정하지 않음
-    void updateEntityFromDto(RecordUpdateDTO dto, @MappingTarget Record record);
+    void updateEntityFromDTO(RecordUpdateDTO dto, @MappingTarget Record record);
 
 }
