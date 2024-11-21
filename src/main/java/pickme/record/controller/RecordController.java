@@ -2,7 +2,7 @@ package pickme.record.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.bson.types.ObjectId;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,14 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import pickme.record.dto.RecordCreateDTO;
 import pickme.record.dto.RecordResponseDTO;
 import pickme.record.dto.RecordUpdateDTO;
-import pickme.record.mapper.RecordMapper;
-import pickme.record.model.Record;
-import pickme.record.repository.RecordRepository;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import pickme.record.service.RecordService;
+import pickme.record.util.TokenUtil;
 
 @RestController
 @RequestMapping("/records")
@@ -25,121 +19,83 @@ import java.util.stream.Collectors;
 public class RecordController {
 
     @Autowired
-    private RecordRepository recordRepository;
+    private RecordService recordService;
+
     @Autowired
-    private RecordMapper recordMapper;
+    private TokenUtil tokenUtil;
 
     // CREATE: 기록 생성
     @Operation(summary = "기록 생성", description = "새로운 면접 기록을 생성합니다.")
     @PostMapping("/create")
     public ResponseEntity<RecordResponseDTO> createRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestBody RecordCreateDTO recordCreateDTO
-            ) {
-        // 로그인 토큰 출력
-        System.out.println("Received token: " + token);
-
-        Record record = recordMapper.toEntity(recordCreateDTO);
-        record.setCreatedAt(new Date());
-
-        Record savedRecord = recordRepository.save(record);
-
-        RecordResponseDTO responseDTO = recordMapper.toResponseDTO(savedRecord);
-
-        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+            @Valid @RequestBody RecordCreateDTO recordCreateDTO
+            ) throws Exception {
+        String userId = tokenUtil.extractUserId(token);
+        RecordResponseDTO responseDTO = recordService.createRecord(userId, recordCreateDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     // READ ALL: 모든 기록 조회
     @Operation(summary = "모든 기록 조회", description = "모든 면접 기록을 조회합니다.")
     @GetMapping("/read")
-    public ResponseEntity<List<RecordResponseDTO>> getAllRecords(
+    public ResponseEntity<RecordResponseDTO> getAllRecords(
             @RequestHeader(value = "Authorization", required = true) String token
-    ) {
-        System.out.println("Received token: " + token);
-
-        List<Record> records = recordRepository.findAll();
-        List<RecordResponseDTO> responseDTOs = records.stream()
-                .map(recordMapper::toResponseDTO)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(responseDTOs);
+    ) throws Exception {
+        String userId = tokenUtil.extractUserId(token);
+        RecordResponseDTO responseDTO = recordService.getAllRecords(userId);
+        return ResponseEntity.ok(responseDTO);
     }
 
     // READ ONE: 특정 기록 조회
     @Operation(summary = "특정 기록 조회", description = "특정 면접 기록을 조회합니다.")
-    @GetMapping("/read/{postId}")
-    public ResponseEntity<RecordResponseDTO> getRecord(
+    @GetMapping("/read/{enterpriseName}/{category}")
+    public ResponseEntity<RecordResponseDTO.EnterpriseRecordResponse> getRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable String postId
-    ) {
-        System.out.println("Received token: " + token);
-
-        ObjectId objectId;
-        try {
-            objectId = new ObjectId(postId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 잘못된 ObjectId
-        }
-
-        Optional<Record> optionalRecord = recordRepository.findById(objectId);
-        if (optionalRecord.isPresent()) {
-            RecordResponseDTO responseDTO = recordMapper.toResponseDTO(optionalRecord.get());
+            @PathVariable String enterpriseName,
+            @PathVariable String category
+    ) throws Exception {
+        String userId = tokenUtil.extractUserId(token);
+        RecordResponseDTO.EnterpriseRecordResponse responseDTO = recordService.getRecord(userId, enterpriseName, category);
+        if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.notFound().build();
         }
     }
 
     // UPDATE: 기록 업데이트
     @Operation(summary = "기록 업데이트", description = "특정 면접 기록을 업데이트합니다.")
-    @PutMapping("/update/{postId}")
-    public ResponseEntity<RecordResponseDTO> updateRecord(
+    @PutMapping("/update/{enterpriseName}/{category}")
+    public ResponseEntity<RecordResponseDTO.EnterpriseRecordResponse> updateRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable String postId,
+            @PathVariable String enterpriseName,
+            @PathVariable String category,
             @RequestBody RecordUpdateDTO updatedRecordDTO
-            ) {
-        System.out.println("Received token: " + token);
-
-        ObjectId objectId;
-        try {
-            objectId = new ObjectId(postId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
-        Optional<Record> optionalRecord = recordRepository.findById(objectId);
-        if (optionalRecord.isPresent()) {
-            Record record = optionalRecord.get();
-            recordMapper.updateEntityFromDTO(updatedRecordDTO, record);
-            Record savedRecord = recordRepository.save(record);
-            RecordResponseDTO responseDTO = recordMapper.toResponseDTO(savedRecord);
+            ) throws Exception {
+        String userId = tokenUtil.extractUserId(token);
+        RecordResponseDTO.EnterpriseRecordResponse responseDTO = recordService.updateRecord(userId, enterpriseName, category, updatedRecordDTO);
+        if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.notFound().build();
         }
     }
 
     // DELETE: 기록 삭제
     @Operation(summary = "기록 삭제", description = "특정 면접 기록을 삭제합니다.")
-    @DeleteMapping("/delete/{postId}")
+    @DeleteMapping("/delete/{enterpriseName}/{category}")
     public ResponseEntity<Void> deleteRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable String postId
-    ) {
-        System.out.println("Received token: " + token);
-
-        ObjectId objectId;
-        try {
-            objectId = new ObjectId(postId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
-        if (recordRepository.existsById(objectId)) {
-            recordRepository.deleteById(objectId);
+            @PathVariable String enterpriseName,
+            @PathVariable String category
+    ) throws Exception {
+        String userId = tokenUtil.extractUserId(token);
+        boolean deleted = recordService.deleteRecord(userId, enterpriseName, category);
+        if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.notFound().build();
         }
     }
 

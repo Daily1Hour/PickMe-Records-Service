@@ -8,10 +8,6 @@ import lombok.Data;
 @Schema(description = "DTO for creating a new interview record")
 public class RecordCreateDTO {
 
-    @Schema(description = "User ID", example = "user123")
-    @NotBlank(message = "User ID is required")
-    private String userId;
-
     @Schema(description = "Enterprise Name", example = "Day Company")
     @NotBlank(message = "Enterprise Name is required")
     private String enterpriseName;

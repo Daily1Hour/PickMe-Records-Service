@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import pickme.record.model.Record;
 
 @Repository
-public interface RecordRepository extends MongoRepository<Record, ObjectId> {
+public interface RecordRepository extends MongoRepository<Record, String> {
 }
