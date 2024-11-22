@@ -12,4 +12,8 @@ public class InterviewRecordCreateDTO {
     @NotBlank(message = "Enterprise Name is required")
     private String enterpriseName;
 
+    @Schema(description = "Category", example = "1st interview")
+    @NotBlank(message = "Category is required")
+    private String category;
+
 }
