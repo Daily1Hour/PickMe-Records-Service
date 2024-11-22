@@ -16,10 +16,10 @@ public class Record {
     @Id
     private String userId;
 
-    private List<EnterpriseRecord> records;
+    private List<InterviewRecord> records;
 
     @Data
-    public static class EnterpriseRecord {
+    public static class InterviewRecord {
         private String enterpriseName;
         private String category;
         private Date createdAt;
