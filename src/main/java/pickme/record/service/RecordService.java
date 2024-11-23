@@ -1,19 +1,29 @@
 package pickme.record.service;
 
-import pickme.record.dto.RecordCreateDTO;
-import pickme.record.dto.RecordResponseDTO;
-import pickme.record.dto.RecordUpdateDTO;
+import pickme.record.dto.*;
+
+import java.util.Date;
+import java.util.List;
 
 public interface RecordService {
 
-    RecordResponseDTO createRecord(String userId, RecordCreateDTO recordCreateDTO);
+    // InterviewRecord 관련 메서드
+    InterviewRecordResponseDTO createInterviewRecord(String userId, InterviewRecordCreateDTO interviewRecordCreateDTO);
 
-    RecordResponseDTO getAllRecords(String userId);
+    InterviewRecordResponseDTO getInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, int page, int size);
 
-    RecordResponseDTO.EnterpriseRecordResponse getRecord(String userId, String enterpriseName, String category);
+    InterviewRecordResponseDTO updateInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, InterviewRecordUpdateDTO interviewRecordUpdateDTO);
 
-    RecordResponseDTO.EnterpriseRecordResponse updateRecord(String userId, String enterpriseName, String category, RecordUpdateDTO updatedRecordDTO);
+    boolean deleteInterviewRecord(String userId, String enterpriseName, String category, Date createdAt);
 
-    boolean deleteRecord(String userId, String enterpriseName, String category);
+    // RecordDetail 관련 메서드
+    RecordDetailResponseDTO createRecordDetail(String userId, String enterpriseName, String category, Date createdAt, RecordDetailCreateDTO recordDetailCreateDTO);
+
+    RecordDetailResponseDTO updateRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO);
+
+    boolean deleteRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex);
+
+    // 사이드바 데이터 조회
+    List<InterviewRecordSidebarDTO> getSidebarData(String userId);
 
 }
