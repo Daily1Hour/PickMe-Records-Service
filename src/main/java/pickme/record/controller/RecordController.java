@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pickme.record.dto.*;
 import pickme.record.service.RecordService;
-import pickme.record.util.TokenUtil;
+import pickme.record.service.JWTService;
 
 import java.util.Date;
 import java.util.List;
@@ -23,7 +23,7 @@ public class RecordController {
     private RecordService recordService;
 
     @Autowired
-    private TokenUtil tokenUtil;
+    private JWTService JWTService;
 
     // 1. 새로운 InterviewRecord 생성
     @Operation(summary = "면접 기록 생성", description = "새로운 면접 기록을 생성합니다.")
@@ -32,7 +32,7 @@ public class RecordController {
             @RequestHeader(value = "Authorization", required = true) String token,
             @Valid @RequestBody InterviewRecordCreateDTO interviewRecordCreateDTO
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         InterviewRecordResponseDTO responseDTO = recordService.createInterviewRecord(userId, interviewRecordCreateDTO);
         return ResponseEntity.status(201).body(responseDTO);
     }
@@ -48,7 +48,7 @@ public class RecordController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         InterviewRecordResponseDTO responseDTO = recordService.getInterviewRecord(userId, enterpriseName, category, createdAt, page, size);
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
@@ -67,7 +67,7 @@ public class RecordController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
             @Valid @RequestBody InterviewRecordUpdateDTO interviewRecordUpdateDTO
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         InterviewRecordResponseDTO responseDTO = recordService.updateInterviewRecord(userId, enterpriseName, category, createdAt, interviewRecordUpdateDTO);
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
@@ -85,7 +85,7 @@ public class RecordController {
             @RequestParam String category,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         boolean deleted = recordService.deleteInterviewRecord(userId, enterpriseName, category, createdAt);
         if (deleted) {
             return ResponseEntity.noContent().build();
@@ -104,7 +104,7 @@ public class RecordController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
             @Valid @RequestBody RecordDetailCreateDTO recordDetailCreateDTO
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         RecordDetailResponseDTO responseDTO = recordService.createRecordDetail(userId, enterpriseName, category, createdAt, recordDetailCreateDTO);
         return ResponseEntity.status(201).body(responseDTO);
     }
@@ -120,7 +120,7 @@ public class RecordController {
             @RequestParam int detailIndex,
             @Valid @RequestBody RecordDetailUpdateDTO recordDetailUpdateDTO
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         RecordDetailResponseDTO responseDTO = recordService.updateRecordDetail(userId, enterpriseName, category, createdAt, detailIndex, recordDetailUpdateDTO);
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
@@ -139,7 +139,7 @@ public class RecordController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
             @RequestParam int detailIndex
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         boolean deleted = recordService.deleteRecordDetail(userId, enterpriseName, category, createdAt, detailIndex);
         if (deleted) {
             return ResponseEntity.noContent().build();
@@ -154,7 +154,7 @@ public class RecordController {
     public ResponseEntity<List<InterviewRecordSidebarDTO>> getSidebarData(
             @RequestHeader(value = "Authorization", required = true) String token
     ) throws Exception {
-        String userId = tokenUtil.extractUserId(token);
+        String userId = JWTService.extractToken(token);
         List<InterviewRecordSidebarDTO> responseDTOs = recordService.getSidebarData(userId);
         return ResponseEntity.ok(responseDTOs);
     }
