@@ -2,11 +2,11 @@ package pickme.record.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "records")
 @Data
@@ -14,19 +14,23 @@ import java.util.Date;
 public class Record {
 
     @Id
-    @Schema(description = "Post ID (PK)", example = "60d5f483f8d4b91234567890")
-    private ObjectId postId;
-
-    @Schema(description = "User ID", example = "user")
     private String userId;
 
-    @Schema(description = "Category", example = "1st interview")
-    private String category;
+    private List<InterviewRecord> records;
 
-    @Schema(description = "Content", example = "(1분 자기소개) 안녕하십니까. 뫄뫄 기업 솨솨 직무에 지원한 김땡땡입니다.")
-    private String content;
+    @Data
+    public static class InterviewRecord {
+        private String enterpriseName;
+        private String category;
+        private Date createdAt;
+        private Date updatedAt;
+        private List<RecordDetail> details;
+    }
 
-    @Schema(description = "Creation Time", example = "2023-01-01T12:34:56Z")
-    private Date createdAt;
+    @Data
+    public static class RecordDetail {
+        private String question;
+        private String answer;
+    }
 
 }
