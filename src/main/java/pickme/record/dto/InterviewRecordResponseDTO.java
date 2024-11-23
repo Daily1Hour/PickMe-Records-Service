@@ -12,7 +12,8 @@ public class InterviewRecordResponseDTO {
 
     private String enterpriseName;
     private String category;
-    private Date createdAt; // 필요할까?
+    private Date createdAt;
+    private Date updatedAt;
     private List<RecordDetailResponseDTO> details;
 
 }
