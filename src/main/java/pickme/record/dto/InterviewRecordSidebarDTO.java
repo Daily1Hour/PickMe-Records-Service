@@ -12,5 +12,6 @@ public class InterviewRecordSidebarDTO {
     private String enterpriseName;
     private String category;
     private Date createdAt;
+    private Date updatedAt;
 
 }
