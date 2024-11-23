@@ -21,6 +21,7 @@ public interface RecordMapper {
         dto.setEnterpriseName(interviewRecord.getEnterpriseName());
         dto.setCategory(interviewRecord.getCategory());
         dto.setCreatedAt(interviewRecord.getCreatedAt());
+        dto.setUpdatedAt(interviewRecord.getUpdatedAt());
         dto.setDetails(toRecordDetailResponseList(interviewRecord.getDetails()));
         return dto;
     }
@@ -34,6 +35,7 @@ public interface RecordMapper {
         dto.setEnterpriseName(interviewRecord.getEnterpriseName());
         dto.setCategory(interviewRecord.getCategory());
         dto.setCreatedAt(interviewRecord.getCreatedAt());
+        dto.setUpdatedAt(interviewRecord.getUpdatedAt());
         return dto;
     }
 
