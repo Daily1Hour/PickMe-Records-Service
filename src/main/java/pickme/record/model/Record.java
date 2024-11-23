@@ -23,6 +23,7 @@ public class Record {
         private String enterpriseName;
         private String category;
         private Date createdAt;
+        private Date updatedAt;
         private List<RecordDetail> details;
     }
 
