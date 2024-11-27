@@ -2,124 +2,161 @@ package pickme.record.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.bson.types.ObjectId;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pickme.record.dto.RecordCreateDto;
-import pickme.record.dto.RecordResponseDto;
-import pickme.record.dto.RecordUpdateDto;
-import pickme.record.mapper.RecordMapper;
-import pickme.record.model.Record;
-import pickme.record.repository.RecordRepository;
+import pickme.record.dto.*;
+import pickme.record.service.RecordService;
+import pickme.record.service.JWTService;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/record")
+@RequestMapping("/records")
 @Tag(name = "Record", description = "면접 기록 관리 API")
 public class RecordController {
 
     @Autowired
-    private RecordRepository recordRepository;
+    private RecordService recordService;
+
     @Autowired
-    private RecordMapper recordMapper;
+    private JWTService JWTService;
 
-    // CREATE: 기록 생성
-    @Operation(summary = "기록 생성", description = "새로운 면접 기록을 생성합니다.")
-    @PostMapping("/create")
-    public ResponseEntity<RecordResponseDto> createRecord(
+    // 1. 새로운 InterviewRecord 생성
+    @Operation(summary = "면접 기록 생성", description = "새로운 면접 기록을 생성합니다.")
+    @PostMapping("/interview")
+    public ResponseEntity<InterviewRecordResponseDTO> createInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestBody RecordCreateDto recordCreateDto
-            ) {
-        // 로그인 토큰 출력
-        System.out.println("Received token: " + token);
-
-        Record record = recordMapper.toEntity(recordCreateDto);
-        record.setCreatedAt(new Date());
-
-        Record savedRecord = recordRepository.save(record);
-
-        RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord);
-
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+            @Valid @RequestBody InterviewRecordCreateDTO interviewRecordCreateDTO
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        InterviewRecordResponseDTO responseDTO = recordService.createInterviewRecord(userId, interviewRecordCreateDTO);
+        return ResponseEntity.status(201).body(responseDTO);
     }
 
-    // READ ALL: 모든 기록 조회
-    @Operation(summary = "모든 기록 조회", description = "모든 면접 기록을 조회합니다.")
-    @GetMapping("/read")
-    public ResponseEntity<List<RecordResponseDto>> getAllRecords(
-            @RequestHeader(value = "Authorization", required = true) String token
-    ) {
-        System.out.println("Received token: " + token);
-
-        List<Record> records = recordRepository.findAll();
-        List<RecordResponseDto> responseDtos = records.stream()
-                .map(recordMapper::toResponseDto)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(responseDtos);
-    }
-
-    // READ ONE: 특정 기록 조회
-    @Operation(summary = "특정 기록 조회", description = "특정 면접 기록을 조회합니다.")
-    @GetMapping("/read/{postId}")
-    public ResponseEntity<RecordResponseDto> getRecord(
+    // 2. 특정 InterviewRecord 조회
+    @Operation(summary = "면접 기록 조회", description = "특정 면접 기록을 조회합니다.")
+    @GetMapping("/interview")
+    public ResponseEntity<InterviewRecordResponseDTO> getInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable ObjectId postId
-    ) {
-        System.out.println("Received token: " + token);
-
-        Optional<Record> optionalRecord = recordRepository.findById(postId);
-        if (optionalRecord.isPresent()) {
-            RecordResponseDto responseDto = recordMapper.toResponseDto(optionalRecord.get());
-            return ResponseEntity.ok(responseDto);
+            @RequestParam String enterpriseName,
+            @RequestParam String category,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        InterviewRecordResponseDTO responseDTO = recordService.getInterviewRecord(userId, enterpriseName, category, createdAt, page, size);
+        if (responseDTO != null) {
+            return ResponseEntity.ok(responseDTO);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(404).build();
         }
     }
 
-    // UPDATE: 기록 업데이트
-    @Operation(summary = "기록 업데이트", description = "특정 면접 기록을 업데이트합니다.")
-    @PutMapping("/update/{postId}")
-    public ResponseEntity<RecordResponseDto> updateRecord(
+    // 3. InterviewRecord 업데이트
+    @Operation(summary = "면접 기록 업데이트", description = "면접 기록의 기업명과 카테고리를 업데이트합니다.")
+    @PutMapping("/interview")
+    public ResponseEntity<InterviewRecordResponseDTO> updateInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable ObjectId postId,
-            @RequestBody RecordUpdateDto updatedRecordDto
-            ) {
-        System.out.println("Received token: " + token);
-
-        Optional<Record> optionalRecord = recordRepository.findById(postId);
-        if (optionalRecord.isPresent()) {
-            Record record = optionalRecord.get();
-            recordMapper.updateEntityFromDto(updatedRecordDto, record);
-            Record savedRecord = recordRepository.save(record);
-            RecordResponseDto responseDto = recordMapper.toResponseDto(savedRecord);
-            return ResponseEntity.ok(responseDto);
+            @RequestParam String enterpriseName,
+            @RequestParam String category,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @Valid @RequestBody InterviewRecordUpdateDTO interviewRecordUpdateDTO
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        InterviewRecordResponseDTO responseDTO = recordService.updateInterviewRecord(userId, enterpriseName, category, createdAt, interviewRecordUpdateDTO);
+        if (responseDTO != null) {
+            return ResponseEntity.ok(responseDTO);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(404).build();
         }
     }
 
-    // DELETE: 기록 삭제
-    @Operation(summary = "기록 삭제", description = "특정 면접 기록을 삭제합니다.")
-    @DeleteMapping("/delete/{postId}")
-    public ResponseEntity<Void> deleteRecord(
+    // 4. InterviewRecord 삭제
+    @Operation(summary = "면접 기록 삭제", description = "면접 기록과 그에 속한 모든 질문과 답변을 삭제합니다.")
+    @DeleteMapping("/interview")
+    public ResponseEntity<Void> deleteInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable ObjectId postId
-    ) {
-        System.out.println("Received token: " + token);
-
-        if (recordRepository.existsById(postId)) {
-            recordRepository.deleteById(postId);
+            @RequestParam String enterpriseName,
+            @RequestParam String category,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        boolean deleted = recordService.deleteInterviewRecord(userId, enterpriseName, category, createdAt);
+        if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(404).build();
         }
+    }
+
+    // 5. 새로운 RecordDetail 추가
+    @Operation(summary = "질문 및 답변 추가", description = "기존 면접 기록에 새로운 질문과 답변을 추가합니다.")
+    @PostMapping("/interview/detail")
+    public ResponseEntity<RecordDetailResponseDTO> createRecordDetail(
+            @RequestHeader(value = "Authorization", required = true) String token,
+            @RequestParam String enterpriseName,
+            @RequestParam String category,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @Valid @RequestBody RecordDetailCreateDTO recordDetailCreateDTO
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        RecordDetailResponseDTO responseDTO = recordService.createRecordDetail(userId, enterpriseName, category, createdAt, recordDetailCreateDTO);
+        return ResponseEntity.status(201).body(responseDTO);
+    }
+
+    // 6. 특정 RecordDetail 업데이트
+    @Operation(summary = "질문 및 답변 업데이트", description = "면접 기록의 특정 질문과 답변을 업데이트합니다.")
+    @PutMapping("/interview/detail")
+    public ResponseEntity<RecordDetailResponseDTO> updateRecordDetail(
+            @RequestHeader(value = "Authorization", required = true) String token,
+            @RequestParam String enterpriseName,
+            @RequestParam String category,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @RequestParam int detailIndex,
+            @Valid @RequestBody RecordDetailUpdateDTO recordDetailUpdateDTO
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        RecordDetailResponseDTO responseDTO = recordService.updateRecordDetail(userId, enterpriseName, category, createdAt, detailIndex, recordDetailUpdateDTO);
+        if (responseDTO != null) {
+            return ResponseEntity.ok(responseDTO);
+        } else {
+            return ResponseEntity.status(404).build();
+        }
+    }
+
+    // 7. 특정 RecordDetail 삭제
+    @Operation(summary = "질문 및 답변 삭제", description = "면접 기록의 특정 질문과 답변을 삭제합니다.")
+    @DeleteMapping("/interview/detail")
+    public ResponseEntity<Void> deleteRecordDetail(
+            @RequestHeader(value = "Authorization", required = true) String token,
+            @RequestParam String enterpriseName,
+            @RequestParam String category,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @RequestParam int detailIndex
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        boolean deleted = recordService.deleteRecordDetail(userId, enterpriseName, category, createdAt, detailIndex);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(404).build();
+        }
+    }
+
+    // 8. 사이드바 데이터 조회
+    @Operation(summary = "사이드바 데이터 조회", description = "사이드바에 필요한 면접 기록 정보를 조회합니다.")
+    @GetMapping("/sidebar")
+    public ResponseEntity<List<InterviewRecordSidebarDTO>> getSidebarData(
+            @RequestHeader(value = "Authorization", required = true) String token
+    ) throws Exception {
+        String userId = JWTService.extractToken(token);
+        List<InterviewRecordSidebarDTO> responseDTOs = recordService.getSidebarData(userId);
+        return ResponseEntity.ok(responseDTOs);
     }
 
 }
