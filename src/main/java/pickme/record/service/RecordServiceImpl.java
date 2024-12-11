@@ -32,6 +32,7 @@ public class RecordServiceImpl implements RecordService {
 
         // 새로운 InterviewRecord 생성
         Record.InterviewRecord interviewRecord = new Record.InterviewRecord();
+        interviewRecord.setInterviewRecordId(UUID.randomUUID().toString());
         interviewRecord.setEnterpriseName(interviewRecordCreateDTO.getEnterpriseName());
         interviewRecord.setCategory(interviewRecordCreateDTO.getCategory());
         Date now = new Date();
