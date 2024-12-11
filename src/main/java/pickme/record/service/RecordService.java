@@ -10,18 +10,18 @@ public interface RecordService {
     // InterviewRecord 관련 메서드
     InterviewRecordResponseDTO createInterviewRecord(String userId, InterviewRecordCreateDTO interviewRecordCreateDTO);
 
-    InterviewRecordResponseDTO getInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, int page, int size);
+    InterviewRecordResponseDTO getInterviewRecordById(String userId, String interviewRecordId, int page, int size);
 
-    InterviewRecordResponseDTO updateInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, InterviewRecordUpdateDTO interviewRecordUpdateDTO);
+    InterviewRecordResponseDTO updateInterviewRecord(String userId, String interviewRecordId, InterviewRecordUpdateDTO interviewRecordUpdateDTO);
 
-    boolean deleteInterviewRecord(String userId, String enterpriseName, String category, Date createdAt);
+    boolean deleteInterviewRecord(String userId, String interviewRecordId);
 
     // RecordDetail 관련 메서드
-    RecordDetailResponseDTO createRecordDetail(String userId, String enterpriseName, String category, Date createdAt, RecordDetailCreateDTO recordDetailCreateDTO);
+    RecordDetailResponseDTO createRecordDetail(String userId, String interviewRecordId, RecordDetailCreateDTO recordDetailCreateDTO);
 
-    RecordDetailResponseDTO updateRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO);
+    RecordDetailResponseDTO updateRecordDetail(String userId, String interviewRecordId, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO);
 
-    boolean deleteRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex);
+    boolean deleteRecordDetail(String userId, String interviewRecordId, int detailIndex);
 
     // 사이드바 데이터 조회
     List<InterviewRecordSidebarDTO> getSidebarData(String userId);

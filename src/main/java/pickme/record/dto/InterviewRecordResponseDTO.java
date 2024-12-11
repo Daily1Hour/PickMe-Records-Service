@@ -10,6 +10,7 @@ import java.util.List;
 @Schema(description = "DTO for EnterpriseRecord responses")
 public class InterviewRecordResponseDTO {
 
+    private String interviewRecordId;
     private String enterpriseName;
     private String category;
     private Date createdAt;

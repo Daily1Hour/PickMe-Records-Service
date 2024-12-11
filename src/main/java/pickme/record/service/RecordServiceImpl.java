@@ -50,10 +50,10 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public InterviewRecordResponseDTO getInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, int page, int size) {
+    public InterviewRecordResponseDTO getInterviewRecordById(String userId, String interviewRecordId, int page, int size) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
-            Record.InterviewRecord interviewRecord = findInterviewRecord(optionalRecord.get(), enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(optionalRecord.get(), interviewRecordId);;
             if (interviewRecord != null) {
                 // RecordDetail에 페이징 적용
                 List<Record.RecordDetail> allDetails = interviewRecord.getDetails();
@@ -72,11 +72,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public InterviewRecordResponseDTO updateInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, InterviewRecordUpdateDTO interviewRecordUpdateDTO) {
+    public InterviewRecordResponseDTO updateInterviewRecord(String userId, String interviewRecordId, InterviewRecordUpdateDTO interviewRecordUpdateDTO) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null) {
                 interviewRecord.setEnterpriseName(interviewRecordUpdateDTO.getEnterpriseName());
                 interviewRecord.setCategory(interviewRecordUpdateDTO.getCategory());
@@ -89,11 +89,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public boolean deleteInterviewRecord(String userId, String enterpriseName, String category, Date createdAt) {
+    public boolean deleteInterviewRecord(String userId, String interviewRecordId) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null) {
                 record.getRecords().remove(interviewRecord);
                 recordRepository.save(record);
@@ -106,11 +106,11 @@ public class RecordServiceImpl implements RecordService {
     // RecordDetail 관련 메서드
 
     @Override
-    public RecordDetailResponseDTO createRecordDetail(String userId, String enterpriseName, String category, Date createdAt, RecordDetailCreateDTO recordDetailCreateDTO) {
+    public RecordDetailResponseDTO createRecordDetail(String userId, String interviewRecordId, RecordDetailCreateDTO recordDetailCreateDTO) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null) {
                 Record.RecordDetail newDetail = new Record.RecordDetail();
                 newDetail.setQuestion(recordDetailCreateDTO.getQuestion());
@@ -126,11 +126,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public RecordDetailResponseDTO updateRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO) {
+    public RecordDetailResponseDTO updateRecordDetail(String userId, String interviewRecordId, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null && isValidIndex(detailIndex, interviewRecord.getDetails().size())) {
                 Record.RecordDetail detail = interviewRecord.getDetails().get(detailIndex);
                 detail.setQuestion(recordDetailUpdateDTO.getQuestion());
@@ -145,11 +145,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public boolean deleteRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex) {
+    public boolean deleteRecordDetail(String userId, String interviewRecordId, int detailIndex) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null && isValidIndex(detailIndex, interviewRecord.getDetails().size())) {
                 interviewRecord.getDetails().remove(detailIndex);
                 // updatedAt 갱신
@@ -176,11 +176,9 @@ public class RecordServiceImpl implements RecordService {
 
     // 헬퍼 메서드
 
-    private Record.InterviewRecord findInterviewRecord(Record record, String enterpriseName, String category, Date createdAt) {
+    private Record.InterviewRecord findInterviewRecordById(Record record, String interviewRecordId) {
         return record.getRecords().stream()
-                .filter(ir -> ir.getEnterpriseName().equals(enterpriseName)
-                        && ir.getCategory().equals(category)
-                        && ir.getCreatedAt().equals(createdAt))
+                .filter(ir -> ir.getInterviewRecordId().equals(interviewRecordId))
                 .findFirst()
                 .orElse(null);
     }
