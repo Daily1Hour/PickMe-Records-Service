@@ -1,5 +1,7 @@
 package pickme.record.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pickme.record.dto.*;
@@ -18,6 +20,9 @@ public class RecordServiceImpl implements RecordService {
 
     @Autowired
     private RecordMapper recordMapper;
+
+    private static final Logger logger = LoggerFactory.getLogger(RecordServiceImpl.class);
+
 
     // InterviewRecord 관련 메서드
 
@@ -58,14 +63,18 @@ public class RecordServiceImpl implements RecordService {
                 // RecordDetail에 페이징 적용
                 List<Record.RecordDetail> allDetails = interviewRecord.getDetails();
                 int start = page * size;
-                int end = Math.min(start + size, allDetails.size());
-                if (start >= allDetails.size()) {
-                    return null; // 유효하지 않은 페이지 요청
+                int end = start + size;
+
+                List<Record.RecordDetail> paginatedDetails;
+                try {
+                    paginatedDetails = allDetails.subList(start, Math.min(end, allDetails.size()));
+                    InterviewRecordResponseDTO responseDTO = recordMapper.toInterviewRecordResponse(interviewRecord);
+                    responseDTO.setDetails(recordMapper.toRecordDetailResponseList(paginatedDetails));
+                    return responseDTO;
+                } catch (IndexOutOfBoundsException e) {
+                    logger.warn("Invalid pagination parameters: start={}, size={}, total={}", start, size, allDetails.size(), e);
+                    return null;
                 }
-                List<Record.RecordDetail> paginatedDetails = allDetails.subList(start, end);
-                InterviewRecordResponseDTO responseDTO = recordMapper.toInterviewRecordResponse(interviewRecord);
-                responseDTO.setDetails(recordMapper.toRecordDetailResponseList(paginatedDetails));
-                return responseDTO;
             }
         }
         return null;
