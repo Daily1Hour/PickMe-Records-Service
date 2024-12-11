@@ -53,7 +53,7 @@ public class RecordServiceImpl implements RecordService {
     public InterviewRecordResponseDTO getInterviewRecordById(String userId, String interviewRecordId, int page, int size) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
-            Record.InterviewRecord interviewRecord = findInterviewRecordById(optionalRecord.get(), interviewRecordId);;
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(optionalRecord.get(), interviewRecordId);
             if (interviewRecord != null) {
                 // RecordDetail에 페이징 적용
                 List<Record.RecordDetail> allDetails = interviewRecord.getDetails();
