@@ -36,6 +36,11 @@ public class JWTInterceptor implements HandlerInterceptor {
          * 모든 요청에 대해 인터셉터를 적용할 경우, handler는 사용하지 않아도 됩니다
          */
 
+        // OPTIONS 요청은 인증 처리 생략
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true; 
+        }
+
         // 클라이언트 요청 헤더에서 Authorization 정보를 가져옴
         String token = request.getHeader("Authorization");
 
