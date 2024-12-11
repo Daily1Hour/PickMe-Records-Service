@@ -15,7 +15,7 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # 빌드된 JAR 파일을 복사
-COPY --from=build /app/build/libs/calendar-*-SNAPSHOT.jar app.jar
+COPY --from=build /app/build/libs/record-*-SNAPSHOT.jar app.jar
 
 # Expose port 8080
 EXPOSE 8080
