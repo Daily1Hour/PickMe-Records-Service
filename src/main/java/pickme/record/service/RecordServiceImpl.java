@@ -62,9 +62,14 @@ public class RecordServiceImpl implements RecordService {
             if (interviewRecord != null) {
                 // RecordDetail에 페이징 적용
                 List<Record.RecordDetail> allDetails = interviewRecord.getDetails();
+                if (allDetails == null || allDetails.isEmpty()) {
+                    // details가 없으면 빈 리스트로 반환
+                    InterviewRecordResponseDTO responseDTO = recordMapper.toInterviewRecordResponse(interviewRecord);
+                    responseDTO.setDetails(Collections.emptyList());
+                }
+                // RecordDetail에 페이징 적용
                 int start = page * size;
                 int end = start + size;
-
                 List<Record.RecordDetail> paginatedDetails;
                 try {
                     paginatedDetails = allDetails.subList(start, Math.min(end, allDetails.size()));
