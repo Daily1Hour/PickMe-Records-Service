@@ -20,6 +20,7 @@ public class Record {
 
     @Data
     public static class InterviewRecord {
+        private String interviewRecordId;
         private String enterpriseName;
         private String category;
         private Date createdAt;

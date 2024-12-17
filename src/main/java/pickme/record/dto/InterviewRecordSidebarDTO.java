@@ -9,6 +9,7 @@ import java.util.Date;
 @Schema(description = "DTO for EnterpriseRecord sidebar data")
 public class InterviewRecordSidebarDTO {
 
+    private String interviewRecordId;
     private String enterpriseName;
     private String category;
     private Date createdAt;

@@ -1,5 +1,7 @@
 package pickme.record.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pickme.record.dto.*;
@@ -19,6 +21,9 @@ public class RecordServiceImpl implements RecordService {
     @Autowired
     private RecordMapper recordMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(RecordServiceImpl.class);
+
+
     // InterviewRecord 관련 메서드
 
     @Override
@@ -32,6 +37,7 @@ public class RecordServiceImpl implements RecordService {
 
         // 새로운 InterviewRecord 생성
         Record.InterviewRecord interviewRecord = new Record.InterviewRecord();
+        interviewRecord.setInterviewRecordId(UUID.randomUUID().toString());
         interviewRecord.setEnterpriseName(interviewRecordCreateDTO.getEnterpriseName());
         interviewRecord.setCategory(interviewRecordCreateDTO.getCategory());
         Date now = new Date();
@@ -49,33 +55,42 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public InterviewRecordResponseDTO getInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, int page, int size) {
+    public InterviewRecordResponseDTO getInterviewRecordById(String userId, String interviewRecordId, int page, int size) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
-            Record.InterviewRecord interviewRecord = findInterviewRecord(optionalRecord.get(), enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(optionalRecord.get(), interviewRecordId);
             if (interviewRecord != null) {
                 // RecordDetail에 페이징 적용
                 List<Record.RecordDetail> allDetails = interviewRecord.getDetails();
-                int start = page * size;
-                int end = Math.min(start + size, allDetails.size());
-                if (start >= allDetails.size()) {
-                    return null; // 유효하지 않은 페이지 요청
+                if (allDetails == null || allDetails.isEmpty()) {
+                    // details가 없으면 빈 리스트로 반환
+                    InterviewRecordResponseDTO responseDTO = recordMapper.toInterviewRecordResponse(interviewRecord);
+                    responseDTO.setDetails(Collections.emptyList());
                 }
-                List<Record.RecordDetail> paginatedDetails = allDetails.subList(start, end);
-                InterviewRecordResponseDTO responseDTO = recordMapper.toInterviewRecordResponse(interviewRecord);
-                responseDTO.setDetails(recordMapper.toRecordDetailResponseList(paginatedDetails));
-                return responseDTO;
+                // RecordDetail에 페이징 적용
+                int start = page * size;
+                int end = start + size;
+                List<Record.RecordDetail> paginatedDetails;
+                try {
+                    paginatedDetails = allDetails.subList(start, Math.min(end, allDetails.size()));
+                    InterviewRecordResponseDTO responseDTO = recordMapper.toInterviewRecordResponse(interviewRecord);
+                    responseDTO.setDetails(recordMapper.toRecordDetailResponseList(paginatedDetails));
+                    return responseDTO;
+                } catch (IndexOutOfBoundsException e) {
+                    logger.warn("Invalid pagination parameters: start={}, size={}, total={}", start, size, allDetails.size(), e);
+                    return null;
+                }
             }
         }
         return null;
     }
 
     @Override
-    public InterviewRecordResponseDTO updateInterviewRecord(String userId, String enterpriseName, String category, Date createdAt, InterviewRecordUpdateDTO interviewRecordUpdateDTO) {
+    public InterviewRecordResponseDTO updateInterviewRecord(String userId, String interviewRecordId, InterviewRecordUpdateDTO interviewRecordUpdateDTO) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null) {
                 interviewRecord.setEnterpriseName(interviewRecordUpdateDTO.getEnterpriseName());
                 interviewRecord.setCategory(interviewRecordUpdateDTO.getCategory());
@@ -88,11 +103,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public boolean deleteInterviewRecord(String userId, String enterpriseName, String category, Date createdAt) {
+    public boolean deleteInterviewRecord(String userId, String interviewRecordId) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null) {
                 record.getRecords().remove(interviewRecord);
                 recordRepository.save(record);
@@ -105,11 +120,11 @@ public class RecordServiceImpl implements RecordService {
     // RecordDetail 관련 메서드
 
     @Override
-    public RecordDetailResponseDTO createRecordDetail(String userId, String enterpriseName, String category, Date createdAt, RecordDetailCreateDTO recordDetailCreateDTO) {
+    public RecordDetailResponseDTO createRecordDetail(String userId, String interviewRecordId, RecordDetailCreateDTO recordDetailCreateDTO) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null) {
                 Record.RecordDetail newDetail = new Record.RecordDetail();
                 newDetail.setQuestion(recordDetailCreateDTO.getQuestion());
@@ -125,11 +140,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public RecordDetailResponseDTO updateRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO) {
+    public RecordDetailResponseDTO updateRecordDetail(String userId, String interviewRecordId, int detailIndex, RecordDetailUpdateDTO recordDetailUpdateDTO) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null && isValidIndex(detailIndex, interviewRecord.getDetails().size())) {
                 Record.RecordDetail detail = interviewRecord.getDetails().get(detailIndex);
                 detail.setQuestion(recordDetailUpdateDTO.getQuestion());
@@ -144,11 +159,11 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public boolean deleteRecordDetail(String userId, String enterpriseName, String category, Date createdAt, int detailIndex) {
+    public boolean deleteRecordDetail(String userId, String interviewRecordId, int detailIndex) {
         Optional<Record> optionalRecord = recordRepository.findById(userId);
         if (optionalRecord.isPresent()) {
             Record record = optionalRecord.get();
-            Record.InterviewRecord interviewRecord = findInterviewRecord(record, enterpriseName, category, createdAt);
+            Record.InterviewRecord interviewRecord = findInterviewRecordById(record, interviewRecordId);
             if (interviewRecord != null && isValidIndex(detailIndex, interviewRecord.getDetails().size())) {
                 interviewRecord.getDetails().remove(detailIndex);
                 // updatedAt 갱신
@@ -175,11 +190,9 @@ public class RecordServiceImpl implements RecordService {
 
     // 헬퍼 메서드
 
-    private Record.InterviewRecord findInterviewRecord(Record record, String enterpriseName, String category, Date createdAt) {
+    private Record.InterviewRecord findInterviewRecordById(Record record, String interviewRecordId) {
         return record.getRecords().stream()
-                .filter(ir -> ir.getEnterpriseName().equals(enterpriseName)
-                        && ir.getCategory().equals(category)
-                        && ir.getCreatedAt().equals(createdAt))
+                .filter(ir -> ir.getInterviewRecordId().equals(interviewRecordId))
                 .findFirst()
                 .orElse(null);
     }

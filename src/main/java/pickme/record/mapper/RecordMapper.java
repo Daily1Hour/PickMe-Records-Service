@@ -18,6 +18,7 @@ public interface RecordMapper {
             return null;
         }
         InterviewRecordResponseDTO dto = new InterviewRecordResponseDTO();
+        dto.setInterviewRecordId(interviewRecord.getInterviewRecordId());
         dto.setEnterpriseName(interviewRecord.getEnterpriseName());
         dto.setCategory(interviewRecord.getCategory());
         dto.setCreatedAt(interviewRecord.getCreatedAt());
@@ -32,6 +33,7 @@ public interface RecordMapper {
             return null;
         }
         InterviewRecordSidebarDTO dto = new InterviewRecordSidebarDTO();
+        dto.setInterviewRecordId(interviewRecord.getInterviewRecordId());
         dto.setEnterpriseName(interviewRecord.getEnterpriseName());
         dto.setCategory(interviewRecord.getCategory());
         dto.setCreatedAt(interviewRecord.getCreatedAt());

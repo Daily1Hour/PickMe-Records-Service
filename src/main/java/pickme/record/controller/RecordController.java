@@ -39,17 +39,15 @@ public class RecordController {
 
     // 2. 특정 InterviewRecord 조회
     @Operation(summary = "면접 기록 조회", description = "특정 면접 기록을 조회합니다.")
-    @GetMapping("/interview")
+    @GetMapping("/interview/{interviewRecordId}")
     public ResponseEntity<InterviewRecordResponseDTO> getInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestParam String enterpriseName,
-            @RequestParam String category,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @PathVariable String interviewRecordId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) throws Exception {
         String userId = JWTService.extractToken(token);
-        InterviewRecordResponseDTO responseDTO = recordService.getInterviewRecord(userId, enterpriseName, category, createdAt, page, size);
+        InterviewRecordResponseDTO responseDTO = recordService.getInterviewRecordById(userId, interviewRecordId, page, size);
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
@@ -59,16 +57,14 @@ public class RecordController {
 
     // 3. InterviewRecord 업데이트
     @Operation(summary = "면접 기록 업데이트", description = "면접 기록의 기업명과 카테고리를 업데이트합니다.")
-    @PutMapping("/interview")
+    @PutMapping("/interview/{interviewRecordId}")
     public ResponseEntity<InterviewRecordResponseDTO> updateInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestParam String enterpriseName,
-            @RequestParam String category,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @PathVariable String interviewRecordId,
             @Valid @RequestBody InterviewRecordUpdateDTO interviewRecordUpdateDTO
     ) throws Exception {
         String userId = JWTService.extractToken(token);
-        InterviewRecordResponseDTO responseDTO = recordService.updateInterviewRecord(userId, enterpriseName, category, createdAt, interviewRecordUpdateDTO);
+        InterviewRecordResponseDTO responseDTO = recordService.updateInterviewRecord(userId, interviewRecordId, interviewRecordUpdateDTO);
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
@@ -78,15 +74,13 @@ public class RecordController {
 
     // 4. InterviewRecord 삭제
     @Operation(summary = "면접 기록 삭제", description = "면접 기록과 그에 속한 모든 질문과 답변을 삭제합니다.")
-    @DeleteMapping("/interview")
+    @DeleteMapping("/interview/{interviewRecordId}")
     public ResponseEntity<Void> deleteInterviewRecord(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestParam String enterpriseName,
-            @RequestParam String category,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt
+            @PathVariable String interviewRecordId
     ) throws Exception {
         String userId = JWTService.extractToken(token);
-        boolean deleted = recordService.deleteInterviewRecord(userId, enterpriseName, category, createdAt);
+        boolean deleted = recordService.deleteInterviewRecord(userId, interviewRecordId);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
@@ -96,32 +90,32 @@ public class RecordController {
 
     // 5. 새로운 RecordDetail 추가
     @Operation(summary = "질문 및 답변 추가", description = "기존 면접 기록에 새로운 질문과 답변을 추가합니다.")
-    @PostMapping("/interview/detail")
+    @PostMapping("/interview/{interviewRecordId}/detail")
     public ResponseEntity<RecordDetailResponseDTO> createRecordDetail(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestParam String enterpriseName,
-            @RequestParam String category,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
+            @PathVariable String interviewRecordId,
             @Valid @RequestBody RecordDetailCreateDTO recordDetailCreateDTO
     ) throws Exception {
         String userId = JWTService.extractToken(token);
-        RecordDetailResponseDTO responseDTO = recordService.createRecordDetail(userId, enterpriseName, category, createdAt, recordDetailCreateDTO);
-        return ResponseEntity.status(201).body(responseDTO);
+        RecordDetailResponseDTO responseDTO = recordService.createRecordDetail(userId, interviewRecordId, recordDetailCreateDTO);
+        if (responseDTO != null) {
+            return ResponseEntity.status(201).body(responseDTO);
+        } else {
+            return ResponseEntity.status(404).build();
+        }
     }
 
     // 6. 특정 RecordDetail 업데이트
     @Operation(summary = "질문 및 답변 업데이트", description = "면접 기록의 특정 질문과 답변을 업데이트합니다.")
-    @PutMapping("/interview/detail")
+    @PutMapping("/interview/{interviewRecordId}/detail/{detailIndex}")
     public ResponseEntity<RecordDetailResponseDTO> updateRecordDetail(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestParam String enterpriseName,
-            @RequestParam String category,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
-            @RequestParam int detailIndex,
+            @PathVariable String interviewRecordId,
+            @PathVariable int detailIndex,
             @Valid @RequestBody RecordDetailUpdateDTO recordDetailUpdateDTO
     ) throws Exception {
         String userId = JWTService.extractToken(token);
-        RecordDetailResponseDTO responseDTO = recordService.updateRecordDetail(userId, enterpriseName, category, createdAt, detailIndex, recordDetailUpdateDTO);
+        RecordDetailResponseDTO responseDTO = recordService.updateRecordDetail(userId, interviewRecordId, detailIndex, recordDetailUpdateDTO);
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
@@ -131,16 +125,14 @@ public class RecordController {
 
     // 7. 특정 RecordDetail 삭제
     @Operation(summary = "질문 및 답변 삭제", description = "면접 기록의 특정 질문과 답변을 삭제합니다.")
-    @DeleteMapping("/interview/detail")
+    @DeleteMapping("/interview/{interviewRecordId}/detail/{detailIndex}")
     public ResponseEntity<Void> deleteRecordDetail(
             @RequestHeader(value = "Authorization", required = true) String token,
-            @RequestParam String enterpriseName,
-            @RequestParam String category,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date createdAt,
-            @RequestParam int detailIndex
+            @PathVariable String interviewRecordId,
+            @PathVariable int detailIndex
     ) throws Exception {
         String userId = JWTService.extractToken(token);
-        boolean deleted = recordService.deleteRecordDetail(userId, enterpriseName, category, createdAt, detailIndex);
+        boolean deleted = recordService.deleteRecordDetail(userId, interviewRecordId, detailIndex);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
