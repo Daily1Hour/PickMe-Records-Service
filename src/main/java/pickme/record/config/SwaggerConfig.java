@@ -26,7 +26,7 @@ public class SwaggerConfig {
 
         // OpenAPI 설정 반환
         return new OpenAPI()
-                .info(new Info().title("PickMe-Records").version("2.0.0")) // API 제목 및 버전 설정
+                .info(new Info().title("PickMe-Record").version("2.0.0")) // API 제목 및 버전 설정
                 .addSecurityItem(securityRequirement) // 보안 요구 사항 추가
                 .schemaRequirement("BearerAuth", securityScheme); // 보안 요구 사항에 대한 설명 추가
     }

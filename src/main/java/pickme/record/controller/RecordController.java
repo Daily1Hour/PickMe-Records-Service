@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/records")
+@RequestMapping("/record")
 @Tag(name = "Record", description = "면접 기록 관리 API")
 public class RecordController {
 
