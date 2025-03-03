@@ -4,14 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pickme.record.dto.*;
 import pickme.record.service.RecordService;
 import pickme.record.service.JWTService;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
