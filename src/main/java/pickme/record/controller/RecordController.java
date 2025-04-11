@@ -2,13 +2,13 @@ package pickme.record.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pickme.record.dto.*;
 import pickme.record.service.RecordService;
-import pickme.record.service.JWTService;
 
 import java.util.List;
 
@@ -20,18 +20,15 @@ public class RecordController {
     @Autowired
     private RecordService recordService;
 
-    @Autowired
-    private JWTService JWTService;
-
     // 1. 새로운 InterviewRecord 생성
     @Operation(summary = "면접 기록 생성", description = "새로운 면접 기록을 생성합니다.")
     @PostMapping("/interview")
     public ResponseEntity<InterviewRecordResponseDTO> createInterviewRecord(
-            @RequestHeader(value = "Authorization", required = true) String token,
-            @Valid @RequestBody InterviewRecordCreateDTO interviewRecordCreateDTO
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
+            HttpServletRequest request,
+            @Valid @RequestBody InterviewRecordCreateDTO interviewRecordCreateDTO) throws Exception {
+        String userId = (String) request.getAttribute("userId");
         InterviewRecordResponseDTO responseDTO = recordService.createInterviewRecord(userId, interviewRecordCreateDTO);
+
         return ResponseEntity.status(201).body(responseDTO);
     }
 
@@ -39,13 +36,14 @@ public class RecordController {
     @Operation(summary = "면접 기록 조회", description = "특정 면접 기록을 조회합니다.")
     @GetMapping("/interview/{interviewRecordId}")
     public ResponseEntity<InterviewRecordResponseDTO> getInterviewRecord(
-            @RequestHeader(value = "Authorization", required = true) String token,
+            HttpServletRequest request,
             @PathVariable String interviewRecordId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
-        InterviewRecordResponseDTO responseDTO = recordService.getInterviewRecordById(userId, interviewRecordId, page, size);
+            @RequestParam(defaultValue = "10") int size) throws Exception {
+        String userId = (String) request.getAttribute("userId");
+        InterviewRecordResponseDTO responseDTO = recordService.getInterviewRecordById(userId, interviewRecordId, page,
+                size);
+
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
@@ -57,12 +55,13 @@ public class RecordController {
     @Operation(summary = "면접 기록 업데이트", description = "면접 기록의 기업명과 카테고리를 업데이트합니다.")
     @PutMapping("/interview/{interviewRecordId}")
     public ResponseEntity<InterviewRecordResponseDTO> updateInterviewRecord(
-            @RequestHeader(value = "Authorization", required = true) String token,
+            HttpServletRequest request,
             @PathVariable String interviewRecordId,
-            @Valid @RequestBody InterviewRecordUpdateDTO interviewRecordUpdateDTO
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
-        InterviewRecordResponseDTO responseDTO = recordService.updateInterviewRecord(userId, interviewRecordId, interviewRecordUpdateDTO);
+            @Valid @RequestBody InterviewRecordUpdateDTO interviewRecordUpdateDTO) throws Exception {
+        String userId = (String) request.getAttribute("userId");
+        InterviewRecordResponseDTO responseDTO = recordService.updateInterviewRecord(userId, interviewRecordId,
+                interviewRecordUpdateDTO);
+
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
@@ -74,11 +73,11 @@ public class RecordController {
     @Operation(summary = "면접 기록 삭제", description = "면접 기록과 그에 속한 모든 질문과 답변을 삭제합니다.")
     @DeleteMapping("/interview/{interviewRecordId}")
     public ResponseEntity<Void> deleteInterviewRecord(
-            @RequestHeader(value = "Authorization", required = true) String token,
-            @PathVariable String interviewRecordId
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
+            HttpServletRequest request,
+            @PathVariable String interviewRecordId) throws Exception {
+        String userId = (String) request.getAttribute("userId");
         boolean deleted = recordService.deleteInterviewRecord(userId, interviewRecordId);
+
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
@@ -90,12 +89,13 @@ public class RecordController {
     @Operation(summary = "질문 및 답변 추가", description = "기존 면접 기록에 새로운 질문과 답변을 추가합니다.")
     @PostMapping("/interview/{interviewRecordId}/detail")
     public ResponseEntity<RecordDetailResponseDTO> createRecordDetail(
-            @RequestHeader(value = "Authorization", required = true) String token,
+            HttpServletRequest request,
             @PathVariable String interviewRecordId,
-            @Valid @RequestBody RecordDetailCreateDTO recordDetailCreateDTO
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
-        RecordDetailResponseDTO responseDTO = recordService.createRecordDetail(userId, interviewRecordId, recordDetailCreateDTO);
+            @Valid @RequestBody RecordDetailCreateDTO recordDetailCreateDTO) throws Exception {
+        String userId = (String) request.getAttribute("userId");
+        RecordDetailResponseDTO responseDTO = recordService.createRecordDetail(userId, interviewRecordId,
+                recordDetailCreateDTO);
+
         if (responseDTO != null) {
             return ResponseEntity.status(201).body(responseDTO);
         } else {
@@ -107,13 +107,14 @@ public class RecordController {
     @Operation(summary = "질문 및 답변 업데이트", description = "면접 기록의 특정 질문과 답변을 업데이트합니다.")
     @PutMapping("/interview/{interviewRecordId}/detail/{detailIndex}")
     public ResponseEntity<RecordDetailResponseDTO> updateRecordDetail(
-            @RequestHeader(value = "Authorization", required = true) String token,
+            HttpServletRequest request,
             @PathVariable String interviewRecordId,
             @PathVariable int detailIndex,
-            @Valid @RequestBody RecordDetailUpdateDTO recordDetailUpdateDTO
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
-        RecordDetailResponseDTO responseDTO = recordService.updateRecordDetail(userId, interviewRecordId, detailIndex, recordDetailUpdateDTO);
+            @Valid @RequestBody RecordDetailUpdateDTO recordDetailUpdateDTO) throws Exception {
+        String userId = (String) request.getAttribute("userId");
+        RecordDetailResponseDTO responseDTO = recordService.updateRecordDetail(userId, interviewRecordId, detailIndex,
+                recordDetailUpdateDTO);
+
         if (responseDTO != null) {
             return ResponseEntity.ok(responseDTO);
         } else {
@@ -125,12 +126,12 @@ public class RecordController {
     @Operation(summary = "질문 및 답변 삭제", description = "면접 기록의 특정 질문과 답변을 삭제합니다.")
     @DeleteMapping("/interview/{interviewRecordId}/detail/{detailIndex}")
     public ResponseEntity<Void> deleteRecordDetail(
-            @RequestHeader(value = "Authorization", required = true) String token,
+            HttpServletRequest request,
             @PathVariable String interviewRecordId,
-            @PathVariable int detailIndex
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
+            @PathVariable int detailIndex) throws Exception {
+        String userId = (String) request.getAttribute("userId");
         boolean deleted = recordService.deleteRecordDetail(userId, interviewRecordId, detailIndex);
+
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
@@ -142,10 +143,10 @@ public class RecordController {
     @Operation(summary = "사이드바 데이터 조회", description = "사이드바에 필요한 면접 기록 정보를 조회합니다.")
     @GetMapping("/sidebar")
     public ResponseEntity<List<InterviewRecordSidebarDTO>> getSidebarData(
-            @RequestHeader(value = "Authorization", required = true) String token
-    ) throws Exception {
-        String userId = JWTService.extractToken(token);
+            HttpServletRequest request) throws Exception {
+        String userId = (String) request.getAttribute("userId");
         List<InterviewRecordSidebarDTO> responseDTOs = recordService.getSidebarData(userId);
+
         return ResponseEntity.ok(responseDTOs);
     }
 
