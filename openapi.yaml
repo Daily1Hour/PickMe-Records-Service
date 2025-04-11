@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: PickMe-Records
-  version: 2.0.0
+  title: PickMe-Record
+  version: 3.0.0
 servers:
 - url: http://localhost:8080
   description: Generated server url
@@ -11,7 +11,7 @@ tags:
 - name: Record
   description: 면접 기록 관리 API
 paths:
-  /records/interview:
+  /record/interview/{interviewRecordId}:
     get:
       tags:
       - Record
@@ -19,27 +19,11 @@ paths:
       description: 특정 면접 기록을 조회합니다.
       operationId: getInterviewRecord
       parameters:
-      - name: Authorization
-        in: header
+      - name: interviewRecordId
+        in: path
         required: true
         schema:
           type: string
-      - name: enterpriseName
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: category
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: createdAt
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
       - name: page
         in: query
         required: false
@@ -54,6 +38,25 @@ paths:
           type: integer
           format: int32
           default: 10
+      - name: X-User-Id
+        in: header
+        description: 사용자 ID (식별값)
+        required: true
+        schema:
+          type: string
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: OK
@@ -68,57 +71,35 @@ paths:
       description: 면접 기록의 기업명과 카테고리를 업데이트합니다.
       operationId: updateInterviewRecord
       parameters:
-      - name: Authorization
+      - name: interviewRecordId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-User-Id
         in: header
+        description: 사용자 ID (식별값)
         required: true
         schema:
           type: string
-      - name: enterpriseName
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: category
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: createdAt
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InterviewRecordUpdateDTO"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/InterviewRecordResponseDTO"
-    post:
-      tags:
-      - Record
-      summary: 면접 기록 생성
-      description: 새로운 면접 기록을 생성합니다.
-      operationId: createInterviewRecord
-      parameters:
-      - name: Authorization
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
         in: header
-        required: true
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
         schema:
           type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/InterviewRecordCreateDTO"
+              $ref: "#/components/schemas/InterviewRecordUpdateDTO"
         required: true
       responses:
         "200":
@@ -134,31 +115,34 @@ paths:
       description: 면접 기록과 그에 속한 모든 질문과 답변을 삭제합니다.
       operationId: deleteInterviewRecord
       parameters:
-      - name: Authorization
+      - name: interviewRecordId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-User-Id
         in: header
+        description: 사용자 ID (식별값)
         required: true
         schema:
           type: string
-      - name: enterpriseName
-        in: query
-        required: true
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
         schema:
           type: string
-      - name: category
-        in: query
-        required: true
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
         schema:
           type: string
-      - name: createdAt
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
       responses:
         "200":
           description: OK
-  /records/interview/detail:
+  /record/interview/{interviewRecordId}/detail/{detailIndex}:
     put:
       tags:
       - Record
@@ -166,79 +150,41 @@ paths:
       description: 면접 기록의 특정 질문과 답변을 업데이트합니다.
       operationId: updateRecordDetail
       parameters:
-      - name: Authorization
-        in: header
+      - name: interviewRecordId
+        in: path
         required: true
         schema:
           type: string
-      - name: enterpriseName
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: category
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: createdAt
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
       - name: detailIndex
-        in: query
+        in: path
         required: true
         schema:
           type: integer
           format: int32
+      - name: X-User-Id
+        in: header
+        description: 사용자 ID (식별값)
+        required: true
+        schema:
+          type: string
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/RecordDetailUpdateDTO"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/RecordDetailResponseDTO"
-    post:
-      tags:
-      - Record
-      summary: 질문 및 답변 추가
-      description: 기존 면접 기록에 새로운 질문과 답변을 추가합니다.
-      operationId: createRecordDetail
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        schema:
-          type: string
-      - name: enterpriseName
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: category
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: createdAt
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RecordDetailCreateDTO"
         required: true
       responses:
         "200":
@@ -254,37 +200,125 @@ paths:
       description: 면접 기록의 특정 질문과 답변을 삭제합니다.
       operationId: deleteRecordDetail
       parameters:
-      - name: Authorization
-        in: header
+      - name: interviewRecordId
+        in: path
         required: true
         schema:
           type: string
-      - name: enterpriseName
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: category
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: createdAt
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
       - name: detailIndex
-        in: query
+        in: path
         required: true
         schema:
           type: integer
           format: int32
+      - name: X-User-Id
+        in: header
+        description: 사용자 ID (식별값)
+        required: true
+        schema:
+          type: string
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: OK
-  /records/sidebar:
+  /record/interview:
+    post:
+      tags:
+      - Record
+      summary: 면접 기록 생성
+      description: 새로운 면접 기록을 생성합니다.
+      operationId: createInterviewRecord
+      parameters:
+      - name: X-User-Id
+        in: header
+        description: 사용자 ID (식별값)
+        required: true
+        schema:
+          type: string
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InterviewRecordCreateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InterviewRecordResponseDTO"
+  /record/interview/{interviewRecordId}/detail:
+    post:
+      tags:
+      - Record
+      summary: 질문 및 답변 추가
+      description: 기존 면접 기록에 새로운 질문과 답변을 추가합니다.
+      operationId: createRecordDetail
+      parameters:
+      - name: interviewRecordId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-User-Id
+        in: header
+        description: 사용자 ID (식별값)
+        required: true
+        schema:
+          type: string
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordDetailCreateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RecordDetailResponseDTO"
+  /record/sidebar:
     get:
       tags:
       - Record
@@ -292,9 +326,23 @@ paths:
       description: 사이드바에 필요한 면접 기록 정보를 조회합니다.
       operationId: getSidebarData
       parameters:
-      - name: Authorization
+      - name: X-User-Id
         in: header
+        description: 사용자 ID (식별값)
         required: true
+        schema:
+          type: string
+          default: 74488dfc-e0f1-70ba-a329-2c0fdb8a54d6
+      - name: X-User-Name
+        in: header
+        description: 사용자 이름
+        required: false
+        schema:
+          type: string
+      - name: X-Client-Id
+        in: header
+        description: 클라이언트 ID
+        required: false
         schema:
           type: string
       responses:
@@ -306,6 +354,18 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/InterviewRecordSidebarDTO"
+  /:
+    get:
+      tags:
+      - HealthCheck
+      operationId: healthCheck
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
 components:
   schemas:
     InterviewRecordUpdateDTO:
@@ -326,6 +386,8 @@ components:
     InterviewRecordResponseDTO:
       type: object
       properties:
+        interviewRecordId:
+          type: string
         enterpriseName:
           type: string
         category:
@@ -397,6 +459,8 @@ components:
     InterviewRecordSidebarDTO:
       type: object
       properties:
+        interviewRecordId:
+          type: string
         enterpriseName:
           type: string
         category:
