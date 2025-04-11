@@ -45,7 +45,8 @@ public class SwaggerConfig {
                 createHeader("X-Client-Id", "클라이언트 ID", false, null));
 
         // 모든 API operation에 헤더 추가
-        return openApi -> openApi.getPaths().values().forEach(pathItem -> pathItem.readOperations()
+        return openApi -> openApi.getPaths().values().forEach(pathItem -> pathItem.readOperations().stream()
+                .filter(operation -> !operation.getTags().contains("HealthCheck")) // HealthCheck API 제외
                 .forEach(operation -> globalHeaders.forEach(operation::addParametersItem)));
     }
 
