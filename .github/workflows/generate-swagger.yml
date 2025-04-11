@@ -1,6 +1,7 @@
 name: Generate Swagger
 
 on:
+  workflow_dispatch:
   push:
     tags: # 태그가 푸시될 때만 실행
       - "v*.*.*"
@@ -48,6 +49,11 @@ jobs:
           distribution: "temurin"
 
       - name: Start Spring Boot Application from Build
+        env:
+          MONGODB_CLUSTER: ${{ secrets.MONGODB_CLUSTER }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+          MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
         run: |
           java -jar ${{ env.JAR_FILE }} & # 서버 실행
           sleep 10 # 서버가 시작될 시간을 기다림

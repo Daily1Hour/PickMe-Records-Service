@@ -1,6 +1,7 @@
 name: Gradle Build
 
 on:
+  workflow_dispatch: # 수동으로 워크플로우를 실행할 수 있도록 설정
   pull_request: # PR이 열릴 때마다 실행
     branches:
       - main
