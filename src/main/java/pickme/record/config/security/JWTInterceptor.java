@@ -42,14 +42,14 @@ public class JWTInterceptor implements HandlerInterceptor {
         String accessToken = request.getHeader("Authorization");
 
         // Api Gateway에서 JWT 토큰을 검증한 후, 사용자 정보를 헤더에 추가하여 전달
-        String userId = request.getHeader("X-User-Id");
-        String userName = request.getHeader("X-Username");
-        String userSub = request.getHeader("X-User-Sub");
+        String userId = request.getHeader("X-User-Id"); // 사용자 ID (식별값)
+        String userName = request.getHeader("X-User-Name"); // 사용자 이름
+        String clintId = request.getHeader("X-Client-Id"); // 클라이언트 앱 ID
 
         // HttpServletRequest에 사용자 정보를 속성으로 추가하여 컨트롤러에서 사용할 수 있게 함
         request.setAttribute("userId", userId);
         request.setAttribute("userName", userName);
-        request.setAttribute("userSub", userSub);
+        request.setAttribute("clintId", clintId);
 
         // 요청 처리를 계속 진행
         return true;
