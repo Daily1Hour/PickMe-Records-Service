@@ -6,15 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import pickme.record.service.JWTService;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JWTInterceptor implements HandlerInterceptor {
-
-    private final JWTService jwtService;
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         /*
@@ -42,19 +38,18 @@ public class JWTInterceptor implements HandlerInterceptor {
         }
 
         // 클라이언트 요청 헤더에서 Authorization 정보를 가져옴
-        String token = request.getHeader("Authorization");
+        // 인가 용도로 필요하면 엑세스 토큰 사용
+        String accessToken = request.getHeader("Authorization");
 
-        // Authorization 헤더가 없거나 Bearer 형식이 아니면 401(Unauthorized) 상태 코드를 반환하고 요청을 중단
-        if(token == null || !token.startsWith("Bearer ")){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 응답 상태를 401로 설정
-            return false; // 요청 처리 중단
-        }
-
-        // 토큰에서 사용자 정보를 추출
-        String userInfo = jwtService.extractToken(token);
+        // Api Gateway에서 JWT 토큰을 검증한 후, 사용자 정보를 헤더에 추가하여 전달
+        String userId = request.getHeader("X-User-Id");
+        String userName = request.getHeader("X-Username");
+        String userSub = request.getHeader("X-User-Sub");
 
         // HttpServletRequest에 사용자 정보를 속성으로 추가하여 컨트롤러에서 사용할 수 있게 함
-        request.setAttribute("userInfo", userInfo);
+        request.setAttribute("userId", userId);
+        request.setAttribute("userName", userName);
+        request.setAttribute("userSub", userSub);
 
         // 요청 처리를 계속 진행
         return true;
